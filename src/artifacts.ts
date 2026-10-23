@@ -8,13 +8,22 @@ export interface ArtifactType {
   label: string;
   endpoint: string; // APIs.io: /api/v1/<endpoint>
   format: string; // format tag used by compiled + default rules
+  // For the two OpenAPI artifacts, the major the group targets. Both share the
+  // `openapi` format (and its ruleset), but this splits the ruleset into an
+  // explicit Swagger 2.0 (oas2) and OpenAPI 3.x (oas3) grouping — used to select
+  // which rules apply in both validation and the Rules tab. Rules with no
+  // `formats` are format-agnostic and belong to both groups.
+  oasVersion?: 'oas2' | 'oas3';
   searchNote?: string; // shown when the catalog has no data for this type yet
 }
 
-// Order as requested.
+// Order as requested. OpenAPI 3.x and Swagger 2.0 share the `openapi` format (and
+// its ruleset + APIs.io endpoint); the engine auto-detects the document version and
+// runs the matching rules, and `oasVersion` makes each an explicit grouping.
 export const ARTIFACTS: ArtifactType[] = [
   { id: 'apis-json', label: 'APIs.json', endpoint: 'apis-json', format: 'apis-json' },
-  { id: 'openapi', label: 'OpenAPI', endpoint: 'openapis', format: 'openapi' },
+  { id: 'openapi', label: 'OpenAPI 3.x', endpoint: 'openapis', format: 'openapi', oasVersion: 'oas3' },
+  { id: 'swagger', label: 'Swagger 2.0', endpoint: 'openapis', format: 'openapi', oasVersion: 'oas2' },
   { id: 'mcp', label: 'MCP', endpoint: 'mcp', format: 'mcp', searchNote: 'MCP artifacts will appear here as the APIs.io catalog indexes them.' },
   { id: 'arazzo', label: 'Arazzo', endpoint: 'arazzo', format: 'arazzo' },
   { id: 'asyncapi', label: 'AsyncAPI', endpoint: 'asyncapis', format: 'asyncapi' },

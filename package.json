@@ -8,14 +8,16 @@
   "scripts": {
     "compile-rules": "node tools/compile-rules.mjs",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && SINGLEFILE=1 vite build && node tools/zip-dist.mjs",
     "preview": "vite preview",
     "check:skill-sync": "node tools/check-skill-sync.mjs",
     "check:rulesets": "tsx tools/check-rulesets.ts",
     "sync:catalog": "node tools/sync-catalog.mjs",
     "check:catalog": "node tools/sync-catalog.mjs --check",
     "export:site": "node tools/export-site-rules.mjs",
-    "check": "npm run check:catalog && npm run check:rulesets && npm run check:skill-sync"
+    "parity:oas2": "node tools/oas2-parity.mjs",
+    "verify:oas2": "tsx tools/verify-oas2.ts",
+    "check": "npm run check:catalog && npm run check:rulesets && npm run check:skill-sync && npm run verify:oas2"
   },
   "dependencies": {
     "@openlint/openlint-core": "^0.0.1",
@@ -27,9 +29,10 @@
     "yaml": "^2.6.1"
   },
   "devDependencies": {
+    "tsx": "^4.22.4",
+    "typescript": "^5.7.2",
     "vite": "^5.4.11",
     "vite-plugin-node-polyfills": "^0.22.0",
-    "typescript": "^5.7.2",
-    "tsx": "^4.22.4"
+    "vite-plugin-singlefile": "^2.3.4"
   }
 }

@@ -1,8 +1,10 @@
 import * as monaco from 'monaco-editor';
-import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+// Inline the workers (base64 blob) so the single-file "Run Locally" build has no
+// external worker files — it must run from a double-clicked file:// index.html.
+import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker&inline';
+import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker&inline';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
-import { lint, builtinDescriptions, builtinRulesByFormat } from './openlint';
+import { lint, builtinDescriptions, builtinRulesByFormat, builtinFormatsByName } from './openlint';
 import { Markdown } from './markdown';
 import { ARTIFACTS, SAMPLES, artifactById, type ArtifactType } from './artifacts';
 import allRulesRaw from './all-rules.json';
@@ -23,7 +25,14 @@ const BUILTIN_META = builtinMetaRaw as Record<string, { format: string; spec: st
 
 self.MonacoEnvironment = {
   getWorker(_id, label) {
-    return label === 'json' ? new JsonWorker() : new EditorWorker();
+    try {
+      return label === 'json' ? new JsonWorker() : new EditorWorker();
+    } catch {
+      // A locked-down context (e.g. a double-clicked file:// page) may refuse to
+      // spawn workers. Fall back to a no-op worker so the editor still boots —
+      // background language services degrade, but editing + linting work.
+      return new Worker(URL.createObjectURL(new Blob([''], { type: 'text/javascript' })));
+    }
   },
 };
 
@@ -40,6 +49,28 @@ for (const [fmt, rules] of Object.entries(ALL_RULES)) for (const [name, r] of Ob
 const EXTENDS_FOR: Record<string, string> = { openapi: 'spectral:oas', asyncapi: 'spectral:asyncapi', arazzo: 'spectral:arazzo' };
 // strip catalog-only metadata the lint engine doesn't understand
 function engineRule(r: any): any { const { source, title, reference, prompt, _format, ...rest } = r; return rest; }
+
+// ---- OpenAPI major grouping (Swagger 2.0 vs OpenAPI 3.x) --------------------
+// A rule's OpenAPI major(s), as `oas2`/`oas3` tokens. Catalog rules carry an
+// explicit `formats` array (empty/absent = format-agnostic); pure built-in rules
+// (only reached via `extends`) are classified in openlint.ts. A catalog entry
+// always wins so an agnostic curated rule isn't mistaken for a same-named built-in.
+function formatTokensFor(name: string, rule?: any): string[] {
+  const cat = rule ?? RULE_INDEX[name];
+  if (cat) return Array.isArray(cat.formats) ? cat.formats.map(String) : [];
+  return builtinFormatsByName[name] ?? [];
+}
+// Does a rule belong to an artifact's group? Non-OpenAPI artifacts (no oasVersion)
+// take every rule of their format. For the two OpenAPI artifacts, a rule applies
+// when it targets that major, or when it is format-agnostic (fires on both).
+function ruleAppliesToArtifact(name: string, rule: any, a: ArtifactType): boolean {
+  if (!a.oasVersion) return true;
+  const toks = formatTokensFor(name, rule);
+  if (!toks.length) return true; // format-agnostic → both 2.0 and 3.x
+  return a.oasVersion === 'oas2'
+    ? toks.some((t) => t.includes('oas2'))
+    : toks.some((t) => t.includes('oas3'));
+}
 
 // ---- state ------------------------------------------------------------------
 let current: ArtifactType = artifactById('openapi');
@@ -336,17 +367,21 @@ function applyFilterToView() {
 // ---- active ruleset ---------------------------------------------------------
 function activeRulesetDef(): any {
   const rules: Record<string, any> = {};
-  // catalog rules for this format (built-ins come via `extends`, not the data form)
+  // catalog rules for this format (built-ins come via `extends`, not the data form).
+  // For the OpenAPI artifacts, keep only the rules that apply to the selected major
+  // (Swagger 2.0 vs OpenAPI 3.x) so the active ruleset — and its count — reflects
+  // the chosen grouping rather than the whole shared `openapi` format.
   for (const [name, rule] of Object.entries(ALL_RULES[current.format] || {})) {
     if ((rule as any).source === 'builtin') continue;
     const t: string[] = Array.isArray((rule as any).tags) ? (rule as any).tags : [];
     if (t.includes('duplicate:true')) continue;
+    if (!ruleAppliesToArtifact(name, rule, current)) continue;
     rules[name] = engineRule(rule);
   }
-  // we don't support Swagger / OpenAPI 2.0 — turn off any built-in oas2 rules
-  for (const name of builtinRulesByFormat[current.format] ?? []) {
-    if (/^oas2[-_]/i.test(name)) rules[name] = 'off';
-  }
+  // Built-in (extended) rules come in via `extends`. Swagger / OpenAPI 2.0 is
+  // supported now, so the built-in oas2 rules are no longer turned off; the engine
+  // only runs a built-in whose format matches the document, so the oas2 and oas3
+  // built-ins coexist safely under either grouping.
   // saved rule overrides for this format take priority over the originals
   const isInline = (name: string) => !!ALL_RULES[current.format]?.[name] && ALL_RULES[current.format][name].source !== 'builtin';
   for (const r of loadRules()) {
@@ -840,6 +875,7 @@ function switchTab(name: string) {
   ($('#tab-rules') as HTMLElement).hidden = name !== 'rules';
   ($('#tab-repos') as HTMLElement).hidden = name !== 'repos';
   ($('#tab-config') as HTMLElement).hidden = name !== 'config';
+  ($('#tab-about') as HTMLElement).hidden = name !== 'about';
   if (name === 'repos') { renderRepos(); loadAccessibleRepos(); }
   // the tag filter applies to Results + Rules; build it lazily on first use
   const filterable = name === 'results' || name === 'ruleset';
@@ -868,15 +904,18 @@ function rulesForArtifact(a: ArtifactType): Array<{ name: string; category: stri
     if (!exp && BUILTIN_META[name]?.experience?.[0]) exp = `experience:${BUILTIN_META[name].experience[0]}`;
     list.push({ name, category: (exp ?? 'experience:other').split(':').slice(1).join(':') });
   };
-  for (const [name, rule] of Object.entries(ALL_RULES[a.format] || {})) add(name, rule);
+  for (const [name, rule] of Object.entries(ALL_RULES[a.format] || {})) {
+    if (ruleAppliesToArtifact(name, rule, a)) add(name, rule);
+  }
   for (const name of builtinRulesByFormat[a.format] ?? []) {
-    if (/^oas2[-_]/i.test(name)) continue; // no Swagger support
-    add(name, RULE_INDEX[name] || null);
+    if (ruleAppliesToArtifact(name, RULE_INDEX[name] || null, a)) add(name, RULE_INDEX[name] || null);
   }
   return list.sort((x, y) => x.name.localeCompare(y.name));
 }
 function renderRuleset() {
-  // apply the active tag filter, then drop artifacts left with no matching rules
+  // apply the active tag filter, then drop artifacts left with no matching rules.
+  // OpenAPI 3.x and Swagger 2.0 share the `openapi` format but are distinct groups
+  // (each shows only its major's rules), so both render under their own heading.
   const arts = ARTIFACTS
     .map((a) => ({ a, rules: rulesForArtifact(a).filter((r) => ruleMatchesFilter(tagsFor(r.name))) }))
     .filter((x) => x.rules.length);
@@ -1027,7 +1066,8 @@ function detectArtifactType(text: string, fileName: string): string | null {
   let d: any;
   try { d = parseYaml(text); } catch { return null; }
   if (!d || typeof d !== 'object') return null;
-  if (d.openapi || d.swagger) return 'openapi';
+  if (d.swagger) return 'swagger'; // Swagger 2.0 → its own grouping (oas2 rules)
+  if (d.openapi) return 'openapi'; // OpenAPI 3.x
   if (d.asyncapi) return 'asyncapi';
   if (d.arazzo) return 'arazzo';
   if (d.specificationVersion || (Array.isArray(d.apis) && d.name)) return 'apis-json';
@@ -1278,7 +1318,9 @@ function runUtility(format: string, id: string) {
 }
 function renderUtilities() {
   const listEl = $('#utilities-list');
-  listEl.innerHTML = ARTIFACTS.map((a) => {
+  // one entry per format: OpenAPI 3.x and Swagger 2.0 share the openapi utilities
+  const seenFormats = new Set<string>();
+  listEl.innerHTML = ARTIFACTS.filter((a) => !seenFormats.has(a.format) && !!seenFormats.add(a.format)).map((a) => {
     const fns = utilitiesFor(a.format);
     const open = a.format === current.format ? ' open' : '';
     const rows = fns.length

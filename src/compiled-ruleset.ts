@@ -174,7 +174,136 @@ export const ruleset = {
         "source:sps-commerce"
       ]
     },
-    "request-support-json-media-type": {
+    "oas2-protocol-https-only": {
+      "description": "ALL requests MUST go through `https` protocol only. It validates the `schemes` field against a JSON Schema (evaluated at `$`). Severity: error.",
+      "formats": [
+        "oas2"
+      ],
+      "recommended": true,
+      "severity": "error",
+      "type": "style",
+      "message": "Schemes MUST be https and no other value is allowed.",
+      "given": "$",
+      "then": {
+        "field": "schemes",
+        "function": "schema",
+        "functionOptions": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "https"
+              ]
+            },
+            "maxItems": 1
+          }
+        }
+      },
+      "tags": [
+        "source:adidas",
+        "format:openapi",
+        "category:security"
+      ]
+    },
+    "oas2-request-support-json": {
+      "description": "Every request SHOULD support `application/json` media type. It validates the targeted value against a JSON Schema (evaluated at `$..consumes`). Severity: warn.",
+      "formats": [
+        "oas2"
+      ],
+      "severity": "warn",
+      "message": "{{description}}: {{error}}",
+      "recommended": true,
+      "given": "$..consumes",
+      "then": {
+        "function": "schema",
+        "functionOptions": {
+          "schema": {
+            "type": "array",
+            "contains": {
+              "type": "string",
+              "enum": [
+                "application/json"
+              ]
+            }
+          }
+        }
+      },
+      "tags": [
+        "source:adidas",
+        "format:openapi",
+        "category:structure"
+      ]
+    },
+    "oas2-example-exists-in-parameters": {
+      "description": "All models MUST have a valid example. It requires the targeted value to be present and non-empty (evaluated at `$..parameters..[?(@.in == 'body' && (@.example || @.schema.$ref))]`). Severity: error.",
+      "severity": "error",
+      "recommended": true,
+      "formats": [
+        "oas2"
+      ],
+      "message": "{{ property }} MUST have a valid example.",
+      "given": "$..parameters..[?(@.in == 'body' && (@.example || @.schema.$ref))]",
+      "then": {
+        "function": "truthy"
+      },
+      "tags": [
+        "source:adidas",
+        "format:openapi",
+        "category:documentation"
+      ]
+    },
+    "oas2-response-success-hal": {
+      "description": "All success responses MUST be of media type `application/hal+json`. It validates the `schema` field against a JSON Schema (evaluated at `$.paths..responses[?( @property >= 200 && @property < 300 && @property != 204)]`). Severity: error.",
+      "severity": "error",
+      "given": "$.paths..responses[?( @property >= 200 && @property < 300 && @property != 204)]",
+      "recommended": true,
+      "type": "style",
+      "formats": [
+        "oas2"
+      ],
+      "message": "Response documents MUST follow application/hal+json: {{error}}",
+      "then": {
+        "field": "schema",
+        "function": "schema",
+        "functionOptions": {
+          "schema": {
+            "$ref": "./supermodel/adidas/api/HAL.yaml"
+          }
+        }
+      },
+      "tags": [
+        "source:adidas",
+        "format:openapi",
+        "category:structure"
+      ]
+    },
+    "oas2-response-error-problem": {
+      "description": "All error responses MUST be of media type `application/problem+json`. It validates the `schema.example` field against a JSON Schema (evaluated at `$.paths..responses[?( @property >= 400 && @property < 600 )]`). Severity: error.",
+      "severity": "error",
+      "formats": [
+        "oas2"
+      ],
+      "given": "$.paths..responses[?( @property >= 400 && @property < 600 )]",
+      "recommended": true,
+      "type": "style",
+      "message": "Error response document MUST follow application/problem+json: {{error}}",
+      "then": {
+        "field": "schema.example",
+        "function": "schema",
+        "functionOptions": {
+          "schema": {
+            "$ref": "./supermodel/adidas/api/ProblemDetail.yaml"
+          }
+        }
+      },
+      "tags": [
+        "source:adidas",
+        "format:openapi",
+        "category:errors"
+      ]
+    },
+    "oas3-request-support-json": {
       "description": "Every request MUST support `application/json` media type. It requires the targeted value to be absent or empty (evaluated at `$.paths.[*].requestBody.content[?(@property.indexOf('json') === -1)]^`). Severity: error.",
       "formats": [
         "oas3"
@@ -189,14 +318,10 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:request-body",
-        "spec:media-types",
-        "experience:consistency",
-        "experience:usability"
+        "category:structure"
       ]
     },
-    "require-https-servers": {
+    "oas3-protocol-https-only": {
       "description": "ALL requests MUST go through `https` protocol only. It requires the targeted value to match the pattern `/^https:/` (evaluated at `$.servers..url`). Severity: error.",
       "formats": [
         "oas3"
@@ -214,11 +339,10 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:servers",
-        "experience:security"
+        "category:security"
       ]
     },
-    "success-response-use-hal-json": {
+    "oas3-response-success-hal": {
       "description": "All success responses MUST be of media type `application/hal+json`. It requires the targeted value to be one of [\"application/hal+json\"] (evaluated at `$.paths..responses[?( @property >= 201 && @property < 300 && @property != 204)].content[*]~`). Severity: error.",
       "severity": "error",
       "given": "$.paths..responses[?( @property >= 201 && @property < 300 && @property != 204)].content[*]~",
@@ -238,14 +362,10 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:responses",
-        "spec:media-types",
-        "experience:consistency",
-        "experience:data-modeling"
+        "category:structure"
       ]
     },
-    "ok-response-use-hal-or-problem-json": {
+    "oas3-response-success-OK": {
       "description": "All success responses MUST be of media type `application/hal+json` or `application/problem+json`. It requires the targeted value to be one of [\"application/hal+json\",\"application/problem+json\"] (evaluated at `$.paths..responses[?( @property == 200 )].content[*]~`). Severity: error.",
       "severity": "error",
       "given": "$.paths..responses[?( @property == 200 )].content[*]~",
@@ -266,14 +386,10 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:responses",
-        "spec:media-types",
-        "experience:consistency",
-        "experience:data-modeling"
+        "category:structure"
       ]
     },
-    "success-response-match-hal-schema": {
+    "oas3-response-success-hal-body": {
       "description": "All success responses MUST follow `application/hal+json` schema. It validates the `schema` field against a JSON Schema (evaluated at `$.paths..responses[?( @property == 200 && @property < 300 && @property != 204)].content[?(@property === \"application/hal+json\")]`). Severity: error.",
       "severity": "error",
       "given": "$.paths..responses[?( @property == 200 && @property < 300 && @property != 204)].content[?(@property === \"application/hal+json\")]",
@@ -295,18 +411,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:responses",
-        "spec:media-types",
-        "experience:data-modeling",
-        "experience:consistency"
+        "category:structure"
       ]
     },
-    "get-no-request-body": {
+    "oas3-no-get-request-body": {
       "description": "GET requests MUST NOT have a request body. It requires the targeted value to be absent or empty (evaluated at `$.paths[*].get.requestBody`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "given": "$.paths[*].get.requestBody",
@@ -317,18 +430,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:operations",
-        "spec:request-body",
-        "experience:consistency",
-        "experience:usability"
+        "category:structure"
       ]
     },
-    "post-not-for-retrieval": {
+    "oas3-not-post-to-get-info": {
       "description": "POST requests SHOULD NOT be used for retrieving information. Use GET instead. It requires the `summary` field not to match `(retrieve|fetch|get|read)` (evaluated at `$.paths[*].post`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "given": "$.paths[*].post",
@@ -343,17 +453,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:operations",
-        "experience:consistency",
-        "experience:usability"
+        "category:documentation"
       ]
     },
-    "put-require-request-body": {
+    "oas3-put-with-request-body": {
       "description": "PUT requests MUST have a request body. It requires the `requestBody` field to be present and non-empty (evaluated at `$.paths[*].put`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "given": "$.paths[*].put",
@@ -365,17 +473,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:operations",
-        "experience:consistency",
-        "experience:usability"
+        "category:structure"
       ]
     },
-    "delete-no-request-body": {
+    "oas3-delete-with-request-body": {
       "description": "DELETE requests MUST NOT have a request body. It requires the targeted value to be absent or empty (evaluated at `$.paths[*].delete.requestBody`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "given": "$.paths[*].delete.requestBody",
@@ -386,18 +492,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:operations",
-        "spec:request-body",
-        "experience:consistency",
-        "experience:usability"
+        "category:structure"
       ]
     },
-    "paths-no-verbs": {
+    "oas3-no-verbs-in-paths": {
       "description": "API paths MUST be resource-focused and MUST NOT include verbs like 'get', 'update', 'create', or 'delete'. It requires the targeted value not to match `/\\b(get|update|create|delete|fetch|retrieve)\\b/` (evaluated at `$.paths[*]~`). Severity: warn.",
       "severity": "warn",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "Path '{{path}}' includes a verb (e.g., 'get', 'update', 'create', 'delete'). API paths SHOULD be resource-focused.",
@@ -411,16 +514,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "experience:naming",
-        "experience:consistency"
+        "category:structure"
       ]
     },
-    "require-realistic-examples": {
+    "oas3-real-like-examples": {
       "description": "API design SHOULD include real-like examples for request and response definitions. It requires the `example` field to be present and non-empty (evaluated at `$..[?(@.example || @.examples)]`). Severity: warn.",
       "severity": "warn",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "The {{property}} SHOULD include a real-like example. Add realistic examples to improve API usability.",
@@ -432,16 +534,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:examples",
-        "experience:documentation",
-        "experience:usability"
+        "category:documentation"
       ]
     },
-    "version-semantic-and-stable": {
+    "oas3-stable-semantic-version": {
       "description": "The API contract MUST have a stable version and MUST follow semantic versioning (e.g., '1.0.0'). Words like 'SNAPSHOT' or 'RELEASE' are not allowed. It requires the targeted value to match the pattern `^(?!.*\\b(SNAPSHOT|RELEASE)\\b)(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$` (evaluated at `$.info.version`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -455,16 +556,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:info",
-        "experience:versioning",
-        "experience:consistency"
+        "category:versioning"
       ]
     },
-    "require-root-security": {
+    "oas3-security-section-required": {
       "description": "The API contract MUST include a 'security' section at the root level. It requires the `security` field to be present and non-empty (evaluated at `$`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -476,16 +576,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:document",
-        "experience:security",
-        "experience:governance"
+        "category:security"
       ]
     },
-    "require-components-section": {
+    "oas3-components-required": {
       "description": "The API contract MUST include a 'components' section. It requires the `components` field to be present and non-empty (evaluated at `$`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -497,16 +596,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:document",
-        "experience:consistency",
-        "experience:governance"
+        "category:general"
       ]
     },
-    "require-security-schemes": {
+    "oas3-security-schemes-required": {
       "description": "The API contract MUST include a 'securitySchemes' subsection under the 'components' section. It requires the `securitySchemes` field to be present and non-empty (evaluated at `$.components`). Severity: error.",
       "severity": "error",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -518,17 +616,16 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:components",
-        "experience:security",
-        "experience:governance",
+        "category:security",
         "source:api-evangelist"
       ]
     },
-    "info-require-leanix-id": {
+    "oas3-x-leanixid-required": {
       "description": "The API contract SHOULD include a custom field 'x-leanixid' in the 'info' section. It requires the `x-leanixid` field to be present and non-empty (evaluated at `$.info`). Severity: warn.",
       "severity": "warn",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -540,16 +637,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:info",
-        "experience:governance",
-        "experience:discoverability"
+        "category:general"
       ]
     },
-    "leanix-id-valid-uuid": {
+    "oas3-x-leanixid-uuid": {
       "description": "The API contract SHOULD include a custom field 'x-leanixid' containing a valid UUID. It requires the targeted value to match the pattern `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$` (evaluated at `$.info.x-leanixid`). Severity: warn.",
       "severity": "warn",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -563,16 +659,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:info",
-        "experience:governance",
-        "experience:consistency"
+        "category:general"
       ]
     },
-    "info-require-gateway": {
+    "oas3-x-gateway-required": {
       "description": "The API contract SHOULD include a custom field 'x-gateway' in the 'info' section. It requires the `x-gateway` field to be present and non-empty (evaluated at `$.info`). Severity: warn.",
       "severity": "warn",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -584,15 +679,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:info",
-        "experience:governance"
+        "category:general"
       ]
     },
-    "gateway-from-allowed-list": {
+    "oas3-x-gateway-required-enumeration": {
       "description": "The 'x-gateway' property, if present, MUST have a value in the enumeration: kong, nginx, aws, akamai, sap, other. It requires the `x-gateway` field to be one of [\"kong\",\"nginx\",\"aws\",\"akamai\",\"sap\",\"other\"] (evaluated at `$`). Severity: warn.",
       "severity": "warn",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "given": "$",
@@ -613,16 +708,15 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:document",
-        "experience:governance",
-        "experience:consistency"
+        "category:general"
       ]
     },
-    "responses-include-hypermedia-links": {
+    "oas3-hypermedia-links-required": {
       "description": "The API contract MAY include hypermedia links to represent the state of resources and be navigable. It requires the `links` field to be present and non-empty (evaluated at `$.paths[*][*].responses[*]`). Severity: hint.",
       "severity": "hint",
       "recommended": true,
       "formats": [
+        "oas2",
         "oas3"
       ],
       "message": "{{description}}: {{error}}",
@@ -634,10 +728,7 @@ export const ruleset = {
       "tags": [
         "source:adidas",
         "format:openapi",
-        "spec:paths",
-        "spec:responses",
-        "experience:discoverability",
-        "experience:usability"
+        "category:structure"
       ]
     },
     "uri-versioning-single-version": {
@@ -1292,7 +1383,7 @@ export const ruleset = {
         "experience:consistency"
       ]
     },
-    "operation-require-security": {
+    "oas3-operation-security-defined": {
       "description": "Check operation security is defined. It requires the `security` field to be present and non-empty (evaluated at `$.paths.*.*`). Severity: error.",
       "severity": "error",
       "given": "$.paths.*.*",
@@ -1303,12 +1394,10 @@ export const ruleset = {
       "tags": [
         "source:digitalocean",
         "format:openapi",
-        "spec:paths",
-        "experience:security",
-        "experience:governance"
+        "category:security"
       ]
     },
-    "operation-security-use-defined-scheme": {
+    "oas3-operation-security-scopes-defined": {
       "description": "Check operation security uses a defined security scheme. It validates the targeted value against a JSON Schema (evaluated at `$.paths[*][*]..security.*`). Severity: error.",
       "severity": "error",
       "given": "$.paths[*][*]..security.*",
@@ -1334,10 +1423,7 @@ export const ruleset = {
       "tags": [
         "source:digitalocean",
         "format:openapi",
-        "spec:security",
-        "spec:paths",
-        "experience:security",
-        "experience:consistency"
+        "category:security"
       ]
     },
     "info-microcks-extension-valid": {
@@ -1648,7 +1734,8 @@ export const ruleset = {
       "description": "Info section is missing a description. It requires the `description` field to be present and non-empty (evaluated at `$.info`). Severity: error.",
       "formats": [
         "oas3",
-        "oas3_1"
+        "oas3_1",
+        "oas2"
       ],
       "given": "$.info",
       "recommended": true,
@@ -1667,11 +1754,73 @@ export const ruleset = {
         "source:api-evangelist"
       ]
     },
+    "oas2-api-host": {
+      "description": "OpenAPI `host` must be present and a non-empty string. It requires the `host` field to be present and non-empty (evaluated at `$`). Severity: info.",
+      "formats": [
+        "oas2"
+      ],
+      "given": "$",
+      "recommended": true,
+      "severity": "info",
+      "then": {
+        "field": "host",
+        "function": "truthy"
+      },
+      "type": "style",
+      "tags": [
+        "source:paystack",
+        "format:openapi",
+        "category:general"
+      ]
+    },
+    "oas2-host-not-example": {
+      "description": "Host URL should not point at example.com. It requires the targeted value not to match `example\\.com` (evaluated at `$.host`). Severity: warn.",
+      "formats": [
+        "oas2"
+      ],
+      "given": "$.host",
+      "recommended": true,
+      "severity": "warn",
+      "then": {
+        "function": "pattern",
+        "functionOptions": {
+          "notMatch": "example\\.com"
+        }
+      },
+      "type": "style",
+      "tags": [
+        "source:paystack",
+        "format:openapi",
+        "category:documentation"
+      ]
+    },
+    "oas2-host-trailing-slash": {
+      "description": "Host URL should not contain a trailing slash. It requires the targeted value not to match `/$` (evaluated at `$.host`). Severity: warn.",
+      "formats": [
+        "oas2"
+      ],
+      "given": "$.host",
+      "recommended": true,
+      "severity": "warn",
+      "then": {
+        "function": "pattern",
+        "functionOptions": {
+          "notMatch": "/$"
+        }
+      },
+      "type": "style",
+      "tags": [
+        "source:paystack",
+        "format:openapi",
+        "category:general"
+      ]
+    },
     "operation-id-url-safe": {
       "description": "OperationId must use URL friendly characters. It requires the `operationId` field to match the pattern `^[A-Za-z0-9-._~:/?#\\[\\]@!\\$&'()*+,;=]*$` (evaluated at `$.paths[*][*]`). Severity: error.",
       "formats": [
         "oas3",
-        "oas3_1"
+        "oas3_1",
+        "oas2"
       ],
       "given": "$.paths[*][*]",
       "recommended": true,
@@ -1697,7 +1846,8 @@ export const ruleset = {
       "description": "Path parameter declarations must not be empty ex. `/api/{}` is invalid. It requires the targeted value not to match `{}` (evaluated at `$.paths`). Severity: error.",
       "formats": [
         "oas3",
-        "oas3_1"
+        "oas3_1",
+        "oas2"
       ],
       "given": "$.paths",
       "recommended": true,
@@ -1722,7 +1872,8 @@ export const ruleset = {
       "description": "Path must not end with a slash. It requires the targeted value not to match `.+\\/$` (evaluated at `$.paths`). Severity: warn.",
       "formats": [
         "oas3",
-        "oas3_1"
+        "oas3_1",
+        "oas2"
       ],
       "given": "$.paths",
       "recommended": true,
@@ -1747,7 +1898,8 @@ export const ruleset = {
       "description": "Path must not include query string. It requires the targeted value not to match `\\?` (evaluated at `$.paths`). Severity: error.",
       "formats": [
         "oas3",
-        "oas3_1"
+        "oas3_1",
+        "oas2"
       ],
       "given": "$.paths",
       "recommended": true,
@@ -2304,6 +2456,25 @@ export const ruleset = {
         "spec:document",
         "experience:data-modeling",
         "experience:consistency"
+      ]
+    },
+    "no-swagger-2": {
+      "description": "Swagger 2 files are not allowed. Use OpenAPI >= 3.0. It requires the `swagger` field to be absent or empty (evaluated at `$`). Severity: error.",
+      "given": "$",
+      "severity": "error",
+      "recommended": true,
+      "type": "style",
+      "formats": [
+        "oas2"
+      ],
+      "then": {
+        "field": "swagger",
+        "function": "falsy"
+      },
+      "tags": [
+        "source:team-digitale",
+        "format:openapi",
+        "category:general"
       ]
     },
     "patch-media-type-not-plain-json": {
@@ -3222,6 +3393,25 @@ export const ruleset = {
         "experience:versioning"
       ],
       "description": "Tag names cannot have version information {{value}}. Consider versioning your API. It requires the targeted value not to match `/(V|v)\\s?[0-9]+/g` (evaluated at `$.tags[*].name`, `$.paths[*][*].tags[*]`). Severity: warn."
+    },
+    "tdp-minimum-spec-version": {
+      "description": "The spec version should be 3 or greater. It requires the `string` field to be present and non-empty (evaluated at `$`). Severity: warn.",
+      "severity": "warn",
+      "formats": [
+        "oas2"
+      ],
+      "given": [
+        "$"
+      ],
+      "then": {
+        "field": "string",
+        "function": "truthy"
+      },
+      "tags": [
+        "source:trimble",
+        "format:openapi",
+        "category:versioning"
+      ]
     },
     "operation-summary-description-differ": {
       "description": "Operation summaries and description should not match. It applies a custom validation to the targeted value (evaluated at `$.paths[*].[get,post,put,patch,delete]`). Severity: warn.",
@@ -4950,7 +5140,7 @@ export const ruleset = {
         "experience:reliability"
       ]
     },
-    "request-support-json-media-type-2": {
+    "request-support-json-media-type": {
       "description": "Every request MUST support `application/json` media type. It validates the targeted value against a JSON Schema (evaluated at `$.paths[*][*].requestBody.content`). Severity: error.",
       "formats": [
         "oas3"

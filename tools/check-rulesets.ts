@@ -70,5 +70,18 @@ for (const fmt of Object.keys(all as any)) {
     failed++;
   }
 }
+// Swagger 2.0 grouping: the same `openapi` ruleset run against a 2.0 document, so a
+// rule that breaks on (rather than skips) a Swagger document fails the gate.
+{
+  const SWAGGER2 = 'swagger: "2.0"\ninfo: {title: t, version: "1"}\nhost: x.com\nbasePath: /v1\nschemes: [https]\npaths:\n  /things:\n    get:\n      operationId: getThings\n      responses: {"200": {description: ok}}';
+  try {
+    sp.setRuleset(new Ruleset(defFor('openapi'), { source: 'check' }));
+    const diag = await sp.run(new Document(SWAGGER2, Parsers.Yaml, 'check'));
+    console.log(`  ok   ${'swagger2'.padEnd(14)} (${diag.length} diagnostics)`);
+  } catch (e: any) {
+    console.log(`  FAIL ${'swagger2'.padEnd(14)} ${String(e?.message || e).slice(0, 120)}`);
+    failed++;
+  }
+}
 if (failed) { console.error(`\n${failed} format(s) failed to construct/run.`); process.exit(1); }
 console.log('\nAll formats construct + run against the real engine.');
