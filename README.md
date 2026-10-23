@@ -1,5 +1,3 @@
-<p align="center"><a href="https://openlint.org"><img src="https://raw.githubusercontent.com/api-commons/common-openlint-validator/main/api-commons-logo.png" alt="API Commons" height="90"></a></p>
-
 # API Commons OpenLint Validator
 
 A browser-based API governance playground — lint **eleven artifact types**

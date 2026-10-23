@@ -1,5 +1,5 @@
-// Vendored from the retired spotlight-cli built-in ruleset (packages/rulesets/src/skill),
-// which has no OpenLint equivalent. This is now the executable source of truth for
+// Vendored from the skill ruleset that shipped with the earlier API Commons linter
+// build, which has no OpenLint equivalent. This is now the executable source of truth for
 // api-commons:skill; tools/check-skill-sync.mjs keeps the rule catalog in step with it.
 import { truthy, pattern, length, schema } from '@openlint/openlint-functions';
 
