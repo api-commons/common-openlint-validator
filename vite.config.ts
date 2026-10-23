@@ -1,15 +1,39 @@
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
-// Static SPA served from a custom domain (validator.apicommons.org), so base '/'.
+// Two build targets:
+//   default        -> dist/       multi-chunk site for validator.apicommons.org
+//                                 (custom domain, so base '/')
+//   SINGLEFILE=1   -> dist-local/ ONE self-contained index.html for the
+//                     "Run Locally" download, so a double-clicked file:// page
+//                     works with no external module/worker fetches (which the
+//                     browser blocks over file://). Workers are inlined via
+//                     ?worker&inline in main.ts.
+const singleFile = process.env.SINGLEFILE === '1';
+
+// Strip the `crossorigin` attribute Vite stamps on the injected <link>/<script>
+// tags. Over file:// a crossorigin stylesheet is a CORS request against a null
+// origin — the browser refuses to apply the CSS. Only needed for the local build.
+const stripCrossorigin = {
+  name: 'strip-crossorigin',
+  transformIndexHtml: {
+    order: 'post' as const,
+    handler: (html: string) => html.replace(/\s+crossorigin(=(["'][^"']*["']|\S+))?/g, ''),
+  },
+};
+
 export default defineConfig({
-  base: '/',
+  base: singleFile ? './' : '/',
   plugins: [
     nodePolyfills({
       // The OpenLint (Spectral fork) engine pulls in a few Node built-ins.
       globals: { process: true, Buffer: true },
     }),
+    ...(singleFile ? [stripCrossorigin, viteSingleFile()] : []),
   ],
-  worker: { format: 'es' },
-  build: { target: 'es2020', sourcemap: false },
+  // Classic (iife) workers inline as blob URLs that run over file://; ES-module
+  // blob workers can be blocked there.
+  worker: { format: singleFile ? 'iife' : 'es' },
+  build: { target: 'es2020', sourcemap: false, outDir: singleFile ? 'dist-local' : 'dist' },
 });
