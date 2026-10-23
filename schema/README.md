@@ -1,6 +1,6 @@
 # Artifact JSON Schemas
 
-The latest-draft JSON Schema for every artifact type the [spotlight-validator](../) lints — one file per artifact, named `<artifact-id>.schema.json`. Bare names are the **latest** version of each spec; `-<version>` files are still-active alternate versions.
+The latest-draft JSON Schema for every artifact type the [common-openlint-validator](../) lints — one file per artifact, named `<artifact-id>.schema.json`. Bare names are the **latest** version of each spec; `-<version>` files are still-active alternate versions.
 
 | File | Artifact | Version | Draft | Source | Size |
 | --- | --- | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ The latest-draft JSON Schema for every artifact type the [spotlight-validator](.
 - **Upstream** schemas are the canonical published files, fetched verbatim from each spec's repo. `mcp` uses the latest dated release (2025-11-25).
 - **Variants** cover the prior major versions still widely in use: OpenAPI **3.0**, AsyncAPI **2.6**, and JSON Schema **draft-07** — alongside the latest (3.1 / 3.0.0 / 2020-12).
 - **`apis-json`** is APIs.json **0.21** (latest), converted to JSON from `api-commons/api-json/spec/schema_0.21.yml`.
-- **Authored** schemas (`json-ld`, `plans`, `rate-limits`, `finops`, `agent-skill`) have no upstream JSON Schema and are written to match what the validator already governs (`rules/defaults/<artifact>.yaml`, and `spotlight:skill` for skills).
+- **Authored** schemas (`json-ld`, `plans`, `rate-limits`, `finops`, `agent-skill`) have no upstream JSON Schema and are written to match what the validator already governs (`rules/defaults/<artifact>.yaml`, and `api-commons:skill` for skills).
 
 ## Notes
 

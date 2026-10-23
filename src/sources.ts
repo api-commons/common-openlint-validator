@@ -1,6 +1,6 @@
 // Shared multi-source search: APIs.io (default) + GitHub/GitLab/Bitbucket code
 // search. Sources are toggled in Config. Token-arg based (no Config coupling), so
-// this module is identical in spotlight-validator and spotlight-discovery.
+// this module is identical in common-openlint-validator and the API Commons discovery tool.
 import { searchArtifacts, loadArtifactContent } from './apisio';
 
 export type SourceId = 'apis.io' | 'github' | 'gitlab' | 'bitbucket';

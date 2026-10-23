@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://spotlight-rules.com/schema/finops.schema.json",
+  "$id": "https://raw.githubusercontent.com/api-commons/common-openlint-validator/main/schema/finops.schema.json",
   "title": "API FinOps",
   "description": "API Evangelist FinOps artifact — the cost/budget profile for operating an API.",
   "type": "object",

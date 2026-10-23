@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://spotlight-rules.com/schema/plans.schema.json",
+  "$id": "https://raw.githubusercontent.com/api-commons/common-openlint-validator/main/schema/plans.schema.json",
   "title": "API Plans",
   "description": "API Evangelist Plans artifact — the access tiers/plans offered for an API.",
   "type": "object",

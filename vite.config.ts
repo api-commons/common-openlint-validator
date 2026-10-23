@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-// Static SPA served from a custom domain (validator.spotlight-rules.com), so base '/'.
+// Static SPA served from a custom domain (validator.apicommons.org), so base '/'.
 export default defineConfig({
   base: '/',
   plugins: [
     nodePolyfills({
-      // The Spotlight (Spectral) engine pulls in a few Node built-ins.
+      // The OpenLint (Spectral fork) engine pulls in a few Node built-ins.
       globals: { process: true, Buffer: true },
     }),
   ],

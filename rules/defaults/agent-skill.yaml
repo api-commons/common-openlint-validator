@@ -1,9 +1,9 @@
-# Agent Skill ruleset — mirrors spotlight:skill in spotlight-cli
-# (packages/rulesets/src/skill). Governs SKILL.md agent skills: YAML frontmatter
+# Agent Skill ruleset — mirrors api-commons:skill
+# (rules/skill/index.ts). Governs SKILL.md agent skills: YAML frontmatter
 # metadata + markdown body structure. This file is the single source for BOTH the
 # rule catalog (spec site; functionOptions ignored there) AND in-browser linting in
 # the validator (functionOptions + custom functions used). Keep rule names + severity
-# in sync with the cli (tools/check-skill-sync.mjs guards it).
+# in sync with rules/skill/index.ts (tools/check-skill-sync.mjs guards it).
 rules:
   skill-name:
     description: A skill must declare a name in its frontmatter — it identifies the skill to agents and tooling.

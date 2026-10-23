@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Spotlight Validator ships a "best-of-breed" ruleset compiled from publicly
+API Commons OpenLint Validator ships a "best-of-breed" ruleset compiled from publicly
 licensed Spectral rulesets, and bundles a small number of custom rule functions
 from some of them. We are grateful to these projects. Each project's full license
 is vendored under [`rules/sources/licenses/`](./rules/sources/licenses/), and the
@@ -39,7 +39,7 @@ paired `-info` positive-confirmation rules are dropped.
 Bundled **custom rule functions** (`src/functions/<source>/`) come from
 DigitalOcean (Apache-2.0), Microcks (Apache-2.0), Trimble (MIT), and Baloise
 (Apache-2.0); their only modification is repointing `@stoplight/spectral-core`
-imports to `@spotlight-rules/spotlight-core`. Original copyright headers are
+imports to `@openlint/openlint-core`. Original copyright headers are
 retained where present; all are covered by the licenses above.
 
 ## Apache License 2.0 sources
@@ -61,5 +61,5 @@ each (including its copyright line) is vendored as
 
 ---
 
-This project (Spotlight Validator) is itself licensed under the Apache License
+This project (API Commons OpenLint Validator) is itself licensed under the Apache License
 2.0 — see [LICENSE](./LICENSE).

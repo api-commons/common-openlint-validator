@@ -23,7 +23,7 @@ export async function commitGitHub(token: string, repo: string, path: string, co
 }
 
 export async function openPrGitHub(token: string, repo: string, path: string, content: string, message: string, base: string): Promise<string> {
-  const head = `spotlight/${path.replace(/[^a-z0-9]+/gi, '-')}-${Date.now().toString(36)}`;
+  const head = `api-commons/${path.replace(/[^a-z0-9]+/gi, '-')}-${Date.now().toString(36)}`;
   const refRes = await fetch(`${GH}/repos/${repo}/git/ref/heads/${encodeURIComponent(base)}`, { headers: headers(token) });
   if (!refRes.ok) throw new Error(`GitHub base ref ${refRes.status}`);
   const baseSha = (await refRes.json()).object.sha;
@@ -35,7 +35,7 @@ export async function openPrGitHub(token: string, repo: string, path: string, co
   await commitGitHub(token, repo, path, content, message, head);
   const pr = await fetch(`${GH}/repos/${repo}/pulls`, {
     method: 'POST', headers: { ...headers(token), 'content-type': 'application/json' },
-    body: JSON.stringify({ title: message, head, base, body: 'Opened by spotlight-validator.' }),
+    body: JSON.stringify({ title: message, head, base, body: 'Opened by common-openlint-validator.' }),
   });
   if (!pr.ok) throw new Error(`GitHub PR ${pr.status}: ${(await pr.json().catch(() => ({})))?.message || ''}`);
   return (await pr.json()).html_url;

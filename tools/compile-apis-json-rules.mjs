@@ -17,11 +17,11 @@ import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseAllDocuments, stringify } from 'yaml';
-import core from '@spotlight-rules/spotlight-core';
-import * as builtins from '@spotlight-rules/spotlight-functions';
-import parsersNs from '@spotlight-rules/spotlight-parsers';
+import * as core from '@openlint/openlint-core';
+import * as builtins from '@openlint/openlint-functions';
+import * as parsersNs from '@openlint/openlint-parsers';
 
-const { Spotlight, Document, Ruleset } = core;
+const { OpenLint, Document, Ruleset } = core;
 const Yaml = parsersNs.Yaml ?? parsersNs.default?.Yaml;
 // Convert data-form (string function names) to JS form (function objects) for validation.
 const FN = { ...builtins };
@@ -85,7 +85,7 @@ for (const [origName, rule] of Object.entries(merged)) {
 
 // ---- validate against the engine, prune throwers ----
 const sample = readFileSync(join(ROOT, 'samples', 'apis-json.yaml'), 'utf8');
-const sp = new Spotlight();
+const sp = new OpenLint();
 let prunedConstruct = 0, prunedRun = 0;
 async function works(name, rule) {
   try {

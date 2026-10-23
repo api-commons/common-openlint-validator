@@ -1,4 +1,4 @@
-# Arazzo — extends the built-in Spotlight Arazzo ruleset.
+# Arazzo — extends the built-in OpenLint Arazzo ruleset.
 extends:
-  - ["spotlight:arazzo", "recommended"]
+  - ["spectral:arazzo", "recommended"]
 rules: {}

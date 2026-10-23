@@ -1,10 +1,10 @@
 // Weave API Evangelist governance services into the app. Every action routes to
 // info@apievangelist.com over a mailto link, with the current context pre-filled
 // — so engagement works even in a forked or fully local copy, with no backend.
-// Spotlight is free, open tooling; API Evangelist sells the expert
+// The validator is free, open tooling; API Evangelist sells the expert
 // services around it, and this is the always-present front door to them.
 const EMAIL = 'info@apievangelist.com';
-const APP = 'the Spotlight Validator';
+const APP = 'the API Commons OpenLint Validator';
 const SERVICES_URL = 'https://apievangelist.com/services/';
 
 interface Service {
@@ -70,7 +70,7 @@ const SERVICES: Service[] = [
 ];
 
 function mailto(s: Service, ctx: string): string {
-  const body = `${s.body(ctx)}\n\n— sent from ${APP} (validator.spotlight-rules.com)`;
+  const body = `${s.body(ctx)}\n\n— sent from ${APP} (validator.apicommons.org)`;
   return `mailto:${EMAIL}?subject=${encodeURIComponent(s.subject)}&body=${encodeURIComponent(body)}`;
 }
 
@@ -90,7 +90,7 @@ export function initEngage(context: () => string): void {
         <button type="button" class="engage-close" aria-label="Close">×</button>
       </div>
       <div class="engage-body">
-        <p class="engage-intro">Spotlight Validator is open and free to run yourself. When you want experts in the loop,
+        <p class="engage-intro">API Commons OpenLint Validator is open and free to run yourself. When you want experts in the loop,
           <a href="https://apievangelist.com" target="_blank" rel="noopener">API Evangelist</a> offers governance
           services — every option below opens an email to
           <a id="engage-email" href="mailto:${EMAIL}">${EMAIL}</a> with your current context filled in.</p>

@@ -1,11 +1,11 @@
-// In-browser linting with the Spotlight engine. We construct a Ruleset directly
-// from a ruleset definition object, resolving `spotlight:*` string extends to the
+// In-browser linting with the OpenLint engine. We construct a Ruleset directly
+// from a ruleset definition object, resolving `spectral:*` string extends to the
 // built-in ruleset objects (no in-browser bundler / fs needed).
-import { Spotlight, Document, Ruleset } from '@spotlight-rules/spotlight-core';
-import type { RulesetDefinition, IRuleResult } from '@spotlight-rules/spotlight-core';
-import * as Parsers from '@spotlight-rules/spotlight-parsers';
-import { oas, asyncapi, arazzo } from '@spotlight-rules/spotlight-rulesets';
-import * as fmts from '@spotlight-rules/spotlight-formats';
+import { OpenLint, Document, Ruleset } from '@openlint/openlint-core';
+import type { RulesetDefinition, IRuleResult } from '@openlint/openlint-core';
+import * as Parsers from '@openlint/openlint-parsers';
+import { oas, asyncapi, arazzo } from '@openlint/openlint-rulesets';
+import * as fmts from '@openlint/openlint-formats';
 import { functions as compiledFunctions } from './compiled-ruleset';
 import * as skillFunctions from './skill-functions';
 
@@ -14,9 +14,9 @@ import * as skillFunctions from './skill-functions';
 const FN_MAP: Record<string, unknown> = { ...compiledFunctions, ...skillFunctions };
 
 const BUILTIN_RULESETS: Record<string, unknown> = {
-  'spotlight:oas': oas,
-  'spotlight:asyncapi': asyncapi,
-  'spotlight:arazzo': arazzo,
+  'spectral:oas': oas,
+  'spectral:asyncapi': asyncapi,
+  'spectral:arazzo': arazzo,
 };
 
 // Rule descriptions from the built-in rulesets, so the UI can show a tooltip for
@@ -69,7 +69,7 @@ function toJsForm(node: any): any {
   return node;
 }
 
-// Replace string extends (e.g. "spotlight:oas") with the imported ruleset object.
+// Replace string extends (e.g. "spectral:oas") with the imported ruleset object.
 function resolveExtendsList(ext: any): any[] | undefined {
   if (ext == null) return undefined;
   const list = Array.isArray(ext) ? ext : [ext];
@@ -108,9 +108,9 @@ export interface LintResult {
   error?: string;
 }
 
-let engine: Spotlight | null = null;
-function getEngine(): Spotlight {
-  return (engine ??= new Spotlight());
+let engine: OpenLint | null = null;
+function getEngine(): OpenLint {
+  return (engine ??= new OpenLint());
 }
 
 export async function lint(documentText: string, rulesetDef: RulesetDefinition, source = 'document', parser: unknown = Parsers.Yaml): Promise<LintResult> {

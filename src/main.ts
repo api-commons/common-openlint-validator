@@ -2,7 +2,7 @@ import * as monaco from 'monaco-editor';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
-import { lint, builtinDescriptions, builtinRulesByFormat } from './spotlight';
+import { lint, builtinDescriptions, builtinRulesByFormat } from './openlint';
 import { Markdown } from './markdown';
 import { ARTIFACTS, SAMPLES, artifactById, type ArtifactType } from './artifacts';
 import allRulesRaw from './all-rules.json';
@@ -18,7 +18,7 @@ import { buildApisJson } from './apisjson';
 import { initEngage } from './engage';
 import './style.css';
 
-// Curated experience/spec tags for the upstream spotlight:* built-in rules.
+// Curated experience/spec tags for the upstream spectral:* built-in rules.
 const BUILTIN_META = builtinMetaRaw as Record<string, { format: string; spec: string[]; experience: string[] }>;
 
 self.MonacoEnvironment = {
@@ -37,7 +37,7 @@ const RULE_INDEX: Record<string, any> = {};
 for (const [fmt, rules] of Object.entries(ALL_RULES)) for (const [name, r] of Object.entries(rules)) RULE_INDEX[name] = { ...(r as any), _format: fmt };
 // which engine built-in ruleset each format extends (built-ins run from there,
 // not from the data form; their catalog entries carry source: builtin)
-const EXTENDS_FOR: Record<string, string> = { openapi: 'spotlight:oas', asyncapi: 'spotlight:asyncapi', arazzo: 'spotlight:arazzo' };
+const EXTENDS_FOR: Record<string, string> = { openapi: 'spectral:oas', asyncapi: 'spectral:asyncapi', arazzo: 'spectral:arazzo' };
 // strip catalog-only metadata the lint engine doesn't understand
 function engineRule(r: any): any { const { source, title, reference, prompt, _format, ...rest } = r; return rest; }
 
@@ -266,7 +266,7 @@ function tagsFor(code: string): string[] {
 // Facets shown in the filter + as row chips. `format`/`source` are intentionally
 // excluded (format = artifact grouping; provenance isn't useful here).
 const FACET_NS = ['experience', 'spec', 'topic', 'owasp'] as const;
-const FILTER_KEY = 'spotlight-validator:filter';
+const FILTER_KEY = 'common-openlint-validator:filter';
 const activeTags = new Set<string>((() => {
   try { const v = JSON.parse(localStorage.getItem(FILTER_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; }
 })());
@@ -491,13 +491,13 @@ async function runLint() {
   lastDiagnostics = diagnostics;
   const model = docEditor.getModel()!;
   if (error) {
-    monaco.editor.setModelMarkers(model, 'spotlight', []);
+    monaco.editor.setModelMarkers(model, 'openlint', []);
     $('#results').innerHTML = `<div class="err">Ruleset/lint error: ${escapeHtml(error)}</div>`;
     $('#result-count').textContent = 'error';
     return;
   }
   monaco.editor.setModelMarkers(
-    model, 'spotlight',
+    model, 'openlint',
     diagnostics.map((d: any) => ({
       severity: sevToMarker[d.severity] ?? monaco.MarkerSeverity.Warning,
       startLineNumber: d.range.start.line + 1,
@@ -1074,7 +1074,7 @@ function downloadFile(name: string, text: string, mime = 'application/yaml') {
 $('#download-apisjson').addEventListener('click', () => {
   const docs = loadDocs();
   if (!docs.length) { window.alert('No saved artifacts to export yet.'); return; }
-  const yaml = buildApisJson('Spotlight Validator artifacts', docs.map((d) => ({ name: d.name, content: d.content, lang: d.lang, type: d.type })));
+  const yaml = buildApisJson('API Commons OpenLint Validator artifacts', docs.map((d) => ({ name: d.name, content: d.content, lang: d.lang, type: d.type })));
   downloadFile('apis.yaml', yaml);
 });
 
@@ -1141,7 +1141,7 @@ initEngage(() => {
   if (lastDiagnostics.length) parts.push(`Findings currently in view: ${lastDiagnostics.length}`);
   const saved = loadDocs().length;
   if (saved) parts.push(`Saved artifacts in this session: ${saved}`);
-  return 'Context from the Spotlight Validator:\n- ' + parts.join('\n- ');
+  return 'Context from the API Commons OpenLint Validator:\n- ' + parts.join('\n- ');
 });
 
 // Reset — clears ALL local storage (saved artifacts + rule overrides) after a confirm.
@@ -1226,7 +1226,7 @@ async function gitSaveDoc(id: string, kind: 'commit' | 'pr') {
   const path = window.prompt(`File path in ${repo}:`, defaultPath);
   if (!path) return;
   const branch = loadRepos().find((r) => r.fullName === repo)?.defaultBranch || 'main';
-  const message = `${kind === 'pr' ? 'Propose' : 'Update'} ${path} via spotlight-validator`;
+  const message = `${kind === 'pr' ? 'Propose' : 'Update'} ${path} via common-openlint-validator`;
   setGitStatus(kind === 'pr' ? 'Opening PR…' : 'Committing…');
   try {
     const url = kind === 'pr'

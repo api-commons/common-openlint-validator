@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // Export every rule from rules/all-rules.yaml — the single consolidated source of
-// truth (compiled best-of-breed + per-type defaults + built-in spotlight:* rules,
-// carrying the Spotlight extensions title / tags / reference) — into the
-// spotlight-rules Jekyll site:
+// truth (compiled best-of-breed + per-type defaults + built-in spectral:* rules,
+// carrying the API Commons extensions title / tags / reference) — into the
+// rules Jekyll site at $RULES_SITE_DIR:
 //   - _data/rule_index.json       : { artifact: {label, rules:[{slug,name,experience,severity}]} }
 //   - _rules/<artifact>/<slug>.md : one collection doc per rule (front matter + description)
-// Run from spotlight-validator: node tools/export-site-rules.mjs
+// Run from common-openlint-validator: RULES_SITE_DIR=<path-to-site> node tools/export-site-rules.mjs
 import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +13,11 @@ import { parse, stringify } from 'yaml';
 import { checkSkillSync } from './check-skill-sync.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SITE = join(ROOT, '..', 'spotlight-rules');
+if (!process.env.RULES_SITE_DIR) {
+  console.error('Set RULES_SITE_DIR to the checkout of the rules Jekyll site to export into.');
+  process.exit(1);
+}
+const SITE = process.env.RULES_SITE_DIR;
 const RULES_DIR = join(SITE, '_rules');
 const ARTIFACTS_DIR = join(SITE, '_artifacts');
 
@@ -55,7 +59,7 @@ const records = [];
 for (const [fmt, rules] of Object.entries(all)) {
   const artifact = FMT_TO_ARTIFACT[fmt] || fmt;
   for (const [slug, r] of Object.entries(rules)) {
-    // Full rule definition as a copy-pasteable Spotlight/Spectral rule, keyed by
+    // Full rule definition as a copy-pasteable OpenLint/Spectral rule, keyed by
     // slug; drop the internal provenance tag so what's shown is a valid rule.
     const { source, ...body } = r;
     records.push({
@@ -113,8 +117,8 @@ writeFileSync(join(SITE, '_data', 'rule_index.json'), JSON.stringify(index, null
 console.log(`exported ${written} rule pages across ${Object.keys(index).length} artifacts`);
 for (const [a, v] of Object.entries(index)) console.log(`  ${a}: ${v.rules.length}`);
 
-// Guard: the agent-skill catalog must mirror the executable spotlight:skill ruleset.
+// Guard: the agent-skill catalog must mirror the executable api-commons:skill ruleset.
 if (!checkSkillSync()) {
-  console.error('Catalog drift detected — align the agent-skill rules in rules/all-rules.yaml with spotlight:skill.');
+  console.error('Catalog drift detected — align the agent-skill rules in rules/all-rules.yaml with api-commons:skill.');
   process.exit(1);
 }

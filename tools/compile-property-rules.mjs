@@ -10,11 +10,11 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stringify } from 'yaml';
-import core from '@spotlight-rules/spotlight-core';
-import * as builtins from '@spotlight-rules/spotlight-functions';
-import parsersNs from '@spotlight-rules/spotlight-parsers';
+import * as core from '@openlint/openlint-core';
+import * as builtins from '@openlint/openlint-functions';
+import * as parsersNs from '@openlint/openlint-parsers';
 
-const { Spotlight, Document, Ruleset } = core;
+const { OpenLint, Document, Ruleset } = core;
 const Yaml = parsersNs.Yaml ?? parsersNs.default?.Yaml;
 const FN = { ...builtins };
 const toJs = (n) => Array.isArray(n) ? n.map(toJs)
@@ -64,7 +64,7 @@ function inferCategory(field) {
   return 'structure';
 }
 
-const sp = new Spotlight();
+const sp = new OpenLint();
 const sample = '{}\n'; // truthy rules never throw on an empty doc; we only check construct+run
 let totalRules = 0;
 for (const [id, cfg] of Object.entries(PROPERTIES)) {

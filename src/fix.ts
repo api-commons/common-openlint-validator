@@ -177,7 +177,7 @@ export function generatePrompt(slug: string, rule: any, description: string, lab
   const clauses = Array.isArray(rule?.then) ? rule.then : (rule?.then ? [rule.then] : []);
   const fix = clauses.map(oneFix).filter(Boolean).join(' Also: ');
   const given = Array.isArray(rule?.given) ? rule.given.join(' | ') : String(rule?.given ?? '');
-  let p = `You are editing ${/^[AEIOU]/.test(label) ? 'an' : 'a'} ${label} document to satisfy the Spotlight API governance rule '${slug}'. `;
+  let p = `You are editing ${/^[AEIOU]/.test(label) ? 'an' : 'a'} ${label} document to satisfy the API governance rule '${slug}'. `;
   if (desc) p += `Requirement: ${desc}${/[.!?]$/.test(desc) ? '' : '.'} `;
   if (fix) p += `To fix: ${fix} `;
   if (given && given !== '$' && given !== 'undefined') p += `This rule is evaluated at the JSONPath \`${given}\` — inspect every location it matches and correct only what violates the rule. `;

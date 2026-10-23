@@ -1,9 +1,9 @@
-description: Spotlight best-of-breed API governance ruleset, compiled from
+description: API Commons best-of-breed API governance ruleset, compiled from
   public Spectral rulesets. Select rules with tags (source:*, category:*,
   format:*).
-documentationUrl: https://github.com/api-commons/spotlight-validator
+documentationUrl: https://github.com/api-commons/common-openlint-validator
 extends:
-  - - spotlight:oas
+  - - spectral:oas
     - recommended
 rules:
   path-segments-kebab-case:

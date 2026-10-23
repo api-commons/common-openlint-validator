@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://spotlight-rules.com/schema/agent-skill.schema.json",
+  "$id": "https://raw.githubusercontent.com/api-commons/common-openlint-validator/main/schema/agent-skill.schema.json",
   "title": "Agent Skill (SKILL.md frontmatter)",
-  "description": "The YAML frontmatter of an agent skill (Anthropic Agent Skills \"SKILL.md\"). The markdown body follows the frontmatter and is governed by spotlight:skill.",
+  "description": "The YAML frontmatter of an agent skill (Anthropic Agent Skills \"SKILL.md\"). The markdown body follows the frontmatter and is governed by api-commons:skill.",
   "type": "object",
   "required": [
     "name",

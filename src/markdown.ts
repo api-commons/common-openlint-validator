@@ -1,7 +1,7 @@
 import { getLocationForJsonPath as yamlGetLocation, parseWithPointers, trapAccess } from '@stoplight/yaml';
 import type { ILocation, JsonPath, IPosition, IDiagnostic } from '@stoplight/types';
 
-import type { IParser } from '@spotlight-rules/spotlight-parsers';
+import type { IParser } from '@openlint/openlint-parsers';
 
 // A Spectral parser for markdown documents with YAML frontmatter — e.g. agent
 // "SKILL.md" files. The frontmatter is parsed as YAML (so rules govern metadata

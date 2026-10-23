@@ -1,5 +1,5 @@
 // The artifact types the validator supports. Each maps to an APIs.io catalog
-// endpoint, a `format` tag used to select rules, a default Spotlight ruleset
+// endpoint, a `format` tag used to select rules, a default API Commons ruleset
 // (rules/defaults/<id>.yaml), and a starter sample (samples/<id>.yaml).
 import { parse as parseYaml } from 'yaml';
 

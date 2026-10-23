@@ -1,24 +1,24 @@
 // CI gate: build the active ruleset for every artifact format from the curated
 // catalog (src/all-rules.json) the way the app does, construct it with the real
-// Spotlight engine, and lint a representative sample. Fails if any format errors
+// OpenLint engine, and lint a representative sample. Fails if any format errors
 // (a malformed `given`, an unresolved function, a bad `extends`). This is the
 // sweep that caught the json-ld `$.@id` and the stray `$.paths.` trailing dot.
 //
 // Run: npm run check:rulesets
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { Spotlight, Document, Ruleset } = require('@spotlight-rules/spotlight-core');
-const Parsers = require('@spotlight-rules/spotlight-parsers');
-const { oas, asyncapi, arazzo } = require('@spotlight-rules/spotlight-rulesets');
-const fmts = require('@spotlight-rules/spotlight-formats');
+const { OpenLint, Document, Ruleset } = require('@openlint/openlint-core');
+const Parsers = require('@openlint/openlint-parsers');
+const { oas, asyncapi, arazzo } = require('@openlint/openlint-rulesets');
+const fmts = require('@openlint/openlint-formats');
 import { functions as compiledFunctions } from '../src/compiled-ruleset';
 import * as skillFunctions from '../src/skill-functions';
 import { Markdown } from '../src/markdown';
 import all from '../src/all-rules.json';
 
 const FN_MAP: any = { ...compiledFunctions, ...skillFunctions };
-const BUILTIN: any = { 'spotlight:oas': oas, 'spotlight:asyncapi': asyncapi, 'spotlight:arazzo': arazzo };
-const EXTENDS_FOR: any = { openapi: 'spotlight:oas', asyncapi: 'spotlight:asyncapi', arazzo: 'spotlight:arazzo' };
+const BUILTIN: any = { 'spectral:oas': oas, 'spectral:asyncapi': asyncapi, 'spectral:arazzo': arazzo };
+const EXTENDS_FOR: any = { openapi: 'spectral:oas', asyncapi: 'spectral:asyncapi', arazzo: 'spectral:arazzo' };
 const FMT_ALIAS: any = { 'json-schema': 'jsonSchema', jsonschema: 'jsonSchema', 'oas3.0': 'oas3_0', 'oas3.1': 'oas3_1' };
 const lookF = (n: string) => fmts[FMT_ALIAS[n] ?? n] ?? fmts[n];
 const toJs = (node: any): any => {
@@ -58,7 +58,7 @@ const SAMPLES: Record<string, string> = {
   'agent-skill': '---\nname: test-skill\ndescription: A real description here please.\n---\n# T\n## Usage\nx\n## Examples\ny',
 };
 
-const sp = new Spotlight();
+const sp = new OpenLint();
 let failed = 0;
 for (const fmt of Object.keys(all as any)) {
   try {

@@ -1,22 +1,22 @@
-<p align="center"><a href="https://spotlight-rules.com"><img src="https://raw.githubusercontent.com/api-commons/spotlight-validator/main/spotlight-rules-logo.png" alt="Spotlight Rules" height="90"></a></p>
+<p align="center"><a href="https://openlint.org"><img src="https://raw.githubusercontent.com/api-commons/common-openlint-validator/main/api-commons-logo.png" alt="API Commons" height="90"></a></p>
 
-# Spotlight Validator
+# API Commons OpenLint Validator
 
 A browser-based API governance playground — lint **eleven artifact types**
 (APIs.json, OpenAPI, MCP, Arazzo, AsyncAPI, JSON Schema, JSON Structure, JSON-LD,
-Plans, Rate Limits, FinOps) with [Spotlight](https://spotlight-rules.com) rules.
-Live at **[validator.spotlight-rules.com](https://validator.spotlight-rules.com)**.
+Plans, Rate Limits, FinOps) with API Commons rules, on the [OpenLint](https://openlint.org) engine.
+Live at **[validator.apicommons.org](https://validator.apicommons.org)**.
 
 - **Search APIs.io and load real artifacts** — pick an artifact type, search the
   [APIs.io](https://apis.io) catalog, and load any result straight into the
   editor. The validator is a first-class internal consumer of the APIs.io API.
   (Requires the apis-io-aws deploy that enables CORS + the internal-tier origin.)
 - **Toggle YAML ⇄ JSON** — the editor converts the artifact in place.
-- **A default Spotlight ruleset per artifact type** — see
+- **A default API Commons ruleset per artifact type** — see
   [`rules/defaults/`](./rules/defaults); OpenAPI/AsyncAPI/Arazzo extend the
-  built-in Spotlight rulesets, the rest are starter rulesets to build on.
-- **Powered by Spotlight, not Spectral** — runs the published
-  `@spotlight-rules/spotlight-*` engine entirely in the browser (no backend).
+  built-in OpenLint rulesets, the rest are starter rulesets to build on.
+- **Powered by OpenLint** — runs the published
+  `@openlint/openlint-*` engine entirely in the browser (no backend).
 - **Best-of-breed rules** compiled from the first-party
   [API Evangelist](https://github.com/api-evangelist/rules) OpenAPI governance
   ruleset plus public, redistribution-compatible Spectral rulesets (SPS Commerce,
@@ -32,17 +32,17 @@ Live at **[validator.spotlight-rules.com](https://validator.spotlight-rules.com)
 
 ```bash
 npm install
-npm run compile-rules   # rebuild rules/spotlight-recommended.yaml + src/compiled-ruleset.json
+npm run compile-rules   # rebuild rules/api-commons-recommended.yaml + src/compiled-ruleset.json
 npm run dev
 ```
 
-Rules use built-in Spotlight functions only (so the compiled set runs with no
+Rules use built-in OpenLint functions only (so the compiled set runs with no
 custom JS); rules needing custom functions are kept in `rules/sources/` for
 future curation. Deployed to GitHub Pages via `.github/workflows/pages.yml`.
 
 ---
 
-Part of [Spotlight Rules](https://spotlight-rules.com) — a project of [API Evangelist](https://apievangelist.com), maintained openly under [API Commons](https://apicommons.org).
+Part of the [API Commons rule catalog](https://apicommons.org/rules/) — a project of [API Evangelist](https://apievangelist.com), maintained openly under [API Commons](https://apicommons.org).
 
 ## Part of API Commons
 

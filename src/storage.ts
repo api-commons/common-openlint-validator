@@ -10,9 +10,9 @@ export interface SavedDoc {
   updatedAt: number;
 }
 
-const DOCS_KEY = 'spotlight-validator:docs';
-const ACTIVE_KEY = 'spotlight-validator:active';
-const CONFIG_KEY = 'spotlight-validator:config';
+const DOCS_KEY = 'common-openlint-validator:docs';
+const ACTIVE_KEY = 'common-openlint-validator:active';
+const CONFIG_KEY = 'common-openlint-validator:config';
 
 export function loadDocs(): SavedDoc[] {
   try {
@@ -104,7 +104,7 @@ export interface SavedRule {
   def: any;
   updatedAt: number;
 }
-const RULES_KEY = 'spotlight-validator:rules';
+const RULES_KEY = 'common-openlint-validator:rules';
 
 export function loadRules(): SavedRule[] {
   try {

@@ -1,4 +1,4 @@
-// Custom Spotlight functions for agent-skill rules (mirror spotlight:skill in the cli).
+// Custom OpenLint functions for agent-skill rules (mirror api-commons:skill in rules/skill/index.ts).
 // Used by rules/defaults/agent-skill.yaml via the function name → ref map (FN_MAP).
 type Heading = { text?: string; depth?: number };
 type SkillData = { headings?: Heading[] };

@@ -1,4 +1,4 @@
-# AsyncAPI — extends the built-in Spotlight AsyncAPI ruleset.
+# AsyncAPI — extends the built-in OpenLint AsyncAPI ruleset.
 extends:
-  - ["spotlight:asyncapi", "recommended"]
+  - ["spectral:asyncapi", "recommended"]
 rules: {}

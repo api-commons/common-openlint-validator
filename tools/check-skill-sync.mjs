@@ -1,7 +1,6 @@
-// Drift guard: the executable spotlight:skill ruleset (in spotlight-cli) and the
+// Drift guard: the executable api-commons:skill ruleset (rules/skill/index.ts) and the
 // agent-skill rule catalog (rules/defaults/agent-skill.yaml, which feeds the spec
-// site) must list the SAME rule names. The catalog is hand-maintained only because
-// the engine isn't published yet (see no-publish-until-1.0); this keeps it honest.
+// site) must list the SAME rule names. The catalog is hand-maintained; this keeps it honest.
 //
 // Run: node tools/check-skill-sync.mjs   (also runs at the end of export-site-rules.mjs)
 import { readFileSync, existsSync } from 'node:fs';
@@ -10,10 +9,10 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI_SKILL = join(ROOT, '..', 'spotlight-cli', 'packages', 'rulesets', 'src', 'skill', 'index.ts');
+const CLI_SKILL = join(ROOT, 'rules', 'skill', 'index.ts');
 const CATALOG = join(ROOT, 'rules', 'all-rules.yaml');
 
-// Rule name → severity from the cli ruleset (4-space-indented quoted 'skill-*' keys,
+// Rule name → severity from the executable ruleset (4-space-indented quoted 'skill-*' keys,
 // each block carrying a `severity: '...'`). Default severity is 'warn' when omitted.
 function cliRules(src) {
   const keys = [...src.matchAll(/^ {4}'(skill-[a-z0-9-]+)':/gm)];
@@ -30,7 +29,7 @@ const catalogRules = (yamlText) =>
 
 export function checkSkillSync() {
   if (!existsSync(CLI_SKILL)) {
-    console.warn(`skill-sync: cannot find ${CLI_SKILL} (spotlight-cli not a sibling checkout) — skipping.`);
+    console.warn(`skill-sync: cannot find ${CLI_SKILL} — skipping.`);
     return true;
   }
   const cli = cliRules(readFileSync(CLI_SKILL, 'utf8'));
@@ -45,10 +44,10 @@ export function checkSkillSync() {
   const onlyCli = [...cli.keys()].filter((n) => !catalog.has(n));
   const onlyCatalog = [...catalog.keys()].filter((n) => !cli.has(n));
   if (onlyCli.length === 0 && onlyCatalog.length === 0) {
-    console.log(`skill-sync: OK — ${cli.size} rules match by name between spotlight:skill and the catalog.`);
+    console.log(`skill-sync: OK — ${cli.size} rules match by name between api-commons:skill and the catalog.`);
     return true;
   }
-  console.error('skill-sync: DRIFT between spotlight:skill (cli) and the agent-skill catalog (rules/all-rules.yaml)');
+  console.error('skill-sync: DRIFT between api-commons:skill (cli) and the agent-skill catalog (rules/all-rules.yaml)');
   if (onlyCli.length) console.error('  in cli but NOT catalog:', onlyCli.join(', '));
   if (onlyCatalog.length) console.error('  in catalog but NOT cli:', onlyCatalog.join(', '));
   return false;
